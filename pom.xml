@@ -7,9 +7,13 @@
   <groupId>com.jerry</groupId>
   <artifactId>jerryservices</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
   <name>jerryservices</name>
   <url>https://www.tech-jerry.com</url>
+  <modules>
+    <module>customer</module>
+  </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
