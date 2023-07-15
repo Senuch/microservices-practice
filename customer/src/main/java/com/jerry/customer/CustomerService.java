@@ -1,8 +1,8 @@
 package com.jerry.customer;
 
+import com.jerry.amqp.RabbitMQMessageProducer;
 import com.jerry.clients.fraud.FraudCheckResponse;
 import com.jerry.clients.fraud.FraudClient;
-import com.jerry.clients.notification.NotificationClient;
 import com.jerry.clients.notification.NotificationRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class CustomerService {
+    private final RabbitMQMessageProducer rabbitMQMessageProducer;
     private final CustomerRepository customerRepository;
-    private final NotificationClient notificationClient;
     private final FraudClient fraudClient;
 
     public void registerCustomer(CustomerRegistrationRequest request) {
@@ -23,12 +23,16 @@ public class CustomerService {
             throw new IllegalStateException("Fraudster");
         }
 
-        notificationClient.sendNotification(
-                new NotificationRequest(
-                        customer.getId(),
-                        customer.getEmail(),
-                        String.format("Hi %s, welcome to micro-services...", customer.getFirstName())
-                )
+        NotificationRequest notificationRequest = new NotificationRequest(
+                customer.getId(),
+                customer.getEmail(),
+                String.format("Hi %s, welcome to micro-services...", customer.getFirstName())
+        );
+
+        rabbitMQMessageProducer.publish(
+                notificationRequest,
+                "internal.exchange",
+                "internal.notification.routing-key"
         );
     }
 }
